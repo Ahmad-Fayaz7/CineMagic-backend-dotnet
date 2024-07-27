@@ -30,9 +30,11 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IActorRepository, ActorRepository>();
 builder.Services.AddScoped<IMovieTheaterRepository, MovieTheaterRepository>();
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<ActorService>();
 builder.Services.AddScoped<MovieTheaterService>();
+builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<IFileStorageService, InAppStorageService>();
 builder.Services.AddHttpContextAccessor();
 // Configure AutoMapper
