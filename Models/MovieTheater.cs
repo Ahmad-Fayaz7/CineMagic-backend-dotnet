@@ -9,7 +9,7 @@ namespace CineMagic.Models
         public int Id { get; set; }
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public Point Location { get; set; }
     }
 }

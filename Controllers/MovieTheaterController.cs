@@ -30,7 +30,7 @@ namespace CineMagic.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddMovieTheater([FromBody] MovieTheaterCreationDTO movieTheaterCreationDTO)
+        public async Task<ActionResult> AddMovieTheater(MovieTheaterCreationDTO movieTheaterCreationDTO)
         {
             var movieTheater = mapper.Map<MovieTheater>(movieTheaterCreationDTO);
             await movieTheaterService.AddMovieTheaterAsync(movieTheater);
