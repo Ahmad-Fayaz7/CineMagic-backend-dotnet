@@ -1,5 +1,6 @@
 ﻿using CineMagic.Models;
 
+
 namespace CineMagic.Repositories.IRepositories
 {
     public interface IGenreRepository : IRepository<Genre>

@@ -5,49 +5,50 @@ using CineMagic.Repositories.IRepositories;
 
 namespace CineMagic.Services
 {
-    public class GenreService(IGenreRepository repository, IMapper mapper)
+    public class GenreService(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        private readonly IGenreRepository _repository = repository;
+
 
         public async Task<IEnumerable<Genre>> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            return await unitOfWork.Genres.GetAllAsync();
+
+
         }
 
         public async Task<Genre> GetByIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id);
+            return await unitOfWork.Genres.GetByIdAsync(id);
         }
 
         public async Task AddAsync(Genre genre)
         {
-            await _repository.AddAsync(genre);
+            await unitOfWork.Genres.AddAsync(genre);
         }
 
         public async Task<bool> UpdateGenreAsync(int id, GenreCreationDTO genreCreationDto)
         {
-            if (!await _repository.ExistsAsync(id))
+            if (!await unitOfWork.Genres.ExistsAsync(id))
             {
                 return false;
             }
 
-            var genre = await _repository.GetByIdAsync(id);
+            var genre = await unitOfWork.Genres.GetByIdAsync(id);
             mapper.Map(genreCreationDto, genre);
-            await _repository.UpdateAsync(genre);
-            await _repository.SaveChangesAsync();
+            await unitOfWork.Genres.UpdateAsync(genre);
 
             return true;
         }
 
         public async Task<bool> DeleteGenreAsync(int id)
         {
-            if (!await _repository.ExistsAsync(id))
+            if (!await unitOfWork.Genres.ExistsAsync(id))
             {
                 return false;
             }
-            var genre = await _repository.GetByIdAsync(id);
-            await _repository.DeleteAsync(genre);
-            await _repository.SaveChangesAsync();
+            var genre = await unitOfWork.Genres.GetByIdAsync(id);
+            await unitOfWork.Genres.RemoveAsync(genre);
+
             return true;
         }
     }

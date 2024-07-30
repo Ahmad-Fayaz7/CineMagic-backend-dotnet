@@ -2,56 +2,61 @@
 using CineMagic.DTOs;
 using CineMagic.Models;
 using CineMagic.Repositories.IRepositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CineMagic.Services
 {
-    public class ActorService(IActorRepository actorRepository, IMapper mapper)
+    public class ActorService(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        public async Task<IQueryable<Actor>> GetAllActorsAysnc()
+        public async Task<IEnumerable<Actor>> GetAllActorsAysnc()
         {
-            var actors = await actorRepository.GetAllAsync();
-            return actors;
+            return await unitOfWork.Actors.GetAllAsync();
+        }
+
+        public async Task<IQueryable<Actor>> GetActorsAsQueryable()
+        {
+            return await unitOfWork.Actors.GetActorsAsQueryable();
         }
 
         public async Task<Actor> GetActorByIdAsync(int id)
         {
-            return await actorRepository.GetByIdAsync(id);
+            return await unitOfWork.Actors.GetByIdAsync(id);
         }
 
         public async Task AddActorAsync(Actor actor)
         {
-            await actorRepository.AddAsync(actor);
+            await unitOfWork.Actors.AddAsync(actor);
         }
 
         public async Task<bool> UpdateActorAsync(int id, ActorCreationDTO actorCreationDTO)
         {
-            if (!await actorRepository.ExistsAsync(id))
+            if (!await unitOfWork.Actors.ExistsAsync(id))
             {
                 return false;
             }
 
-            var actor = await actorRepository.GetByIdAsync(id);
+            var actor = await unitOfWork.Actors.GetByIdAsync(id);
             mapper.Map(actorCreationDTO, actor);
-            await actorRepository.UpdateAsync(actor);
-            await actorRepository.SaveChangesAsync();
+
 
             return true;
         }
 
         public async Task<bool> DeleteActorAsync(int id)
         {
-            if (!await actorRepository.ExistsAsync(id))
+            if (!await unitOfWork.Actors.ExistsAsync(id))
             {
                 return false;
             }
-            var actor = await actorRepository.GetByIdAsync(id);
-            await actorRepository.DeleteAsync(actor);
-            await actorRepository.SaveChangesAsync();
+            var actor = await unitOfWork.Actors.GetByIdAsync(id);
+            await unitOfWork.Actors.RemoveAsync(actor);
+
             return true;
         }
-        public async Task SaveActorChangesAsync()
+
+        public async Task<ActionResult<IEnumerable<MovieActorDTO>>> GetActorsByName(string name)
         {
-            await actorRepository.SaveChangesAsync();
+            return await unitOfWork.Actors.GetActorsByName(name);
         }
     }
 }

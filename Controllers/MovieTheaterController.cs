@@ -34,7 +34,7 @@ namespace CineMagic.Controllers
         {
             var movieTheater = mapper.Map<MovieTheater>(movieTheaterCreationDTO);
             await movieTheaterService.AddMovieTheaterAsync(movieTheater);
-            await movieTheaterService.SaveMovieTheaterChangesAsync();
+
             return NoContent();
         }
 
@@ -44,7 +44,7 @@ namespace CineMagic.Controllers
             var movieTheater = await movieTheaterService.GetMovieTheaterByIdAsync(id);
             if (movieTheater == null) { return NotFound(); }
             movieTheater = mapper.Map(movieTheaterCreationDTO, movieTheater);
-            await movieTheaterService.SaveMovieTheaterChangesAsync();
+
             return NoContent();
         }
 
@@ -57,7 +57,7 @@ namespace CineMagic.Controllers
                 return NotFound();
             }
             await movieTheaterService.DeleteMovieTheaterAsync(id);
-            await movieTheaterService.SaveMovieTheaterChangesAsync();
+
             return NoContent();
         }
 

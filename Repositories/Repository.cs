@@ -1,23 +1,17 @@
-﻿using CineMagic.Models;
-using CineMagic.Repositories.IRepositories;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CineMagic.Repositories
 {
-    public class Repository<T>(ApplicationDbContext dbContext) : IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly ApplicationDbContext _dbContext = dbContext;
-        private readonly DbSet<T> _dbSet = dbContext.Set<T>();
+        protected readonly DbContext _context;
+        protected readonly DbSet<T> _dbSet;
 
-        public async Task AddAsync(T entity)
+        public Repository(DbContext context)
         {
-            await _dbSet.AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<IQueryable<T>> GetAllAsync()
-        {
-            return _dbSet.AsQueryable();
+            _context = context;
+            _dbSet = context.Set<T>();
         }
 
         public async Task<T> GetByIdAsync(int id)
@@ -25,22 +19,43 @@ namespace CineMagic.Repositories
             return await _dbSet.FindAsync(id);
         }
 
+        public async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(T entity)
+        {
+            _dbSet.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveRangeAsync(IEnumerable<T> entities)
+        {
+            _dbSet.RemoveRange(entities);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> ExistsAsync(int id)
         {
             return await _dbSet.FindAsync(id) != null;
         }
-
-        public async Task<bool> DeleteAsync(T entity)
-        {
-            _dbSet.Remove(entity);
-            return true;
-        }
-        public async Task SaveChangesAsync()
-        {
-            await _dbContext.SaveChangesAsync();
-        }
-
-
-
     }
 }

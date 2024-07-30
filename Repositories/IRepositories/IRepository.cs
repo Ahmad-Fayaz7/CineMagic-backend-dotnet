@@ -1,12 +1,16 @@
-﻿namespace CineMagic.Repositories.IRepositories
+﻿using System.Linq.Expressions;
+
+namespace CineMagic.Repositories
 {
     public interface IRepository<T> where T : class
     {
-        Task<IQueryable<T>> GetAllAsync();
-        Task AddAsync(T entity);
         Task<T> GetByIdAsync(int id);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
+        Task AddAsync(T entity);
+        Task AddRangeAsync(IEnumerable<T> entities);
+        Task RemoveAsync(T entity);
+        Task RemoveRangeAsync(IEnumerable<T> entities);
         Task<bool> ExistsAsync(int id);
-        Task<bool> DeleteAsync(T entity);
-        Task SaveChangesAsync();
     }
 }

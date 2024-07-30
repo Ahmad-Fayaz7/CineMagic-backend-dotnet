@@ -17,7 +17,8 @@ namespace CineMagic.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ActorDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var queryable = await actorService.GetAllActorsAysnc();
+            var queryable = await actorService.GetActorsAsQueryable();
+
             await HttpContext.InsertPaginationParametersInHeader<Actor>(queryable);
             var actors = await queryable.OrderBy(x => x.Name).Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<ActorDTO>>(actors);
@@ -39,8 +40,15 @@ namespace CineMagic.Controllers
                 actor.picture = await fileStorageService.SaveFile(containerName, actorCreationDTO.picture);
             }
             await actorService.AddActorAsync(actor);
-            await actorService.SaveActorChangesAsync();
+
             return NoContent();
+        }
+
+        [HttpPost("SearchByName")]
+        public async Task<ActionResult<IEnumerable<MovieActorDTO>>> SearchByName([FromBody] string name)
+        {
+            return await actorService.GetActorsByName(name);
+
         }
 
         [HttpPut("{id:int}")]
@@ -56,7 +64,7 @@ namespace CineMagic.Controllers
             {
                 actor.picture = await fileStorageService.EditFile(containerName, actorCreationDTO.picture, actor.picture);
             }
-            await actorService.SaveActorChangesAsync();
+
             return NoContent();
         }
         [HttpDelete("{id:int}")]
@@ -65,7 +73,7 @@ namespace CineMagic.Controllers
             var actor = await actorService.GetActorByIdAsync(id);
             if (actor == null) { return NotFound(); }
             await actorService.DeleteActorAsync(actor.Id);
-            await actorService.SaveActorChangesAsync();
+
             await fileStorageService.DeleteFile(actor.picture, containerName);
             return NoContent();
         }

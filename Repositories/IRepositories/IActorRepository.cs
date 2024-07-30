@@ -1,9 +1,12 @@
-﻿using CineMagic.Models;
+﻿using CineMagic.DTOs;
+using CineMagic.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CineMagic.Repositories.IRepositories
 {
     public interface IActorRepository : IRepository<Actor>
     {
-        Task UpdateAsync(Actor actor);
+        Task<IQueryable<Actor>> GetActorsAsQueryable();
+        Task<ActionResult<IEnumerable<MovieActorDTO>>> GetActorsByName(string name);
     }
 }

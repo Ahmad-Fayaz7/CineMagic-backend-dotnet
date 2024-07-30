@@ -27,10 +27,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IGenreRepository, GenreRepository>();
-builder.Services.AddScoped<IActorRepository, ActorRepository>();
-builder.Services.AddScoped<IMovieTheaterRepository, MovieTheaterRepository>();
-builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<ActorService>();
 builder.Services.AddScoped<MovieTheaterService>();

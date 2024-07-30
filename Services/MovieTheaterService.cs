@@ -5,52 +5,49 @@ using CineMagic.Repositories.IRepositories;
 
 namespace CineMagic.Services
 {
-    public class MovieTheaterService(IMovieTheaterRepository movieTheaterRepository, IMapper mapper)
+    public class MovieTheaterService(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        public async Task<IQueryable<MovieTheater>> GetAllMovieTheatersAysnc()
+        public async Task<IEnumerable<MovieTheater>> GetAllMovieTheatersAysnc()
         {
-            var movieTheaters = await movieTheaterRepository.GetAllAsync();
-            return movieTheaters;
+            return await unitOfWork.MoviesTheaters.GetAllAsync();
+
         }
 
         public async Task<MovieTheater> GetMovieTheaterByIdAsync(int id)
         {
-            return await movieTheaterRepository.GetByIdAsync(id);
+            return await unitOfWork.MoviesTheaters.GetByIdAsync(id);
         }
 
         public async Task AddMovieTheaterAsync(MovieTheater movieTheater)
         {
-            await movieTheaterRepository.AddAsync(movieTheater);
+            await unitOfWork.MoviesTheaters.AddAsync(movieTheater);
         }
 
         public async Task<bool> UpdateMovieTheaterAsync(int id, MovieTheaterDTO movieTheaterDTO)
         {
-            if (!await movieTheaterRepository.ExistsAsync(id))
+            if (!await unitOfWork.MoviesTheaters.ExistsAsync(id))
             {
                 return false;
             }
 
-            var movieTheater = await movieTheaterRepository.GetByIdAsync(id);
+            var movieTheater = await unitOfWork.MoviesTheaters.GetByIdAsync(id);
             mapper.Map(movieTheaterDTO, movieTheater);
-            await movieTheaterRepository.UpdateAsync(movieTheater);
-            await movieTheaterRepository.SaveChangesAsync();
+            await unitOfWork.MoviesTheaters.UpdateAsync(movieTheater);
+
             return true;
         }
 
         public async Task<bool> DeleteMovieTheaterAsync(int id)
         {
-            if (!await movieTheaterRepository.ExistsAsync(id))
+            if (!await unitOfWork.MoviesTheaters.ExistsAsync(id))
             {
                 return false;
             }
-            var movieTheater = await movieTheaterRepository.GetByIdAsync(id);
-            await movieTheaterRepository.DeleteAsync(movieTheater);
-            await movieTheaterRepository.SaveChangesAsync();
+            var movieTheater = await unitOfWork.MoviesTheaters.GetByIdAsync(id);
+            await unitOfWork.MoviesTheaters.RemoveAsync(movieTheater);
+
             return true;
         }
-        public async Task SaveMovieTheaterChangesAsync()
-        {
-            await movieTheaterRepository.SaveChangesAsync();
-        }
+
     }
 }

@@ -9,7 +9,7 @@ namespace CineMagic.Controllers
 {
     [Route("api/movies")]
     [ApiController]
-    public class MovieController(MovieService movieService, IMapper mapper, InAppStorageService inAppStorageService) : ControllerBase
+    public class MovieController(MovieService movieService, IMapper mapper, IFileStorageService inAppStorageService, GenreService genreService, MovieTheaterService movieTheaterService, ActorService actorService) : ControllerBase
     {
         private readonly string containerName = "movies";
 
@@ -23,9 +23,24 @@ namespace CineMagic.Controllers
             }
             AddOrderToMovie(movie);
             await movieService.AddMovieAsync(movie);
-            await movieService.SaveMovieChangesAsync();
+
             return NoContent();
         }
+        [HttpGet("GetPost")]
+        public async Task<ActionResult<MovieGetPostDTO>> GetPost()
+        {
+            var genres = await genreService.GetAllAsync();
+            genres = genres.OrderBy(x => x.Name);
+            var movieTheaters = await movieTheaterService.GetAllMovieTheatersAysnc();
+            movieTheaters = movieTheaters.OrderBy(x => x.Name);
+            var genresDto = mapper.Map<List<GenreDTO>>(genres);
+            var movieTheatersDto = mapper.Map<List<MovieTheaterDTO>>(movieTheaters);
+            var movieGetPostDto = new MovieGetPostDTO { Genres = genresDto, MovieTheaters = movieTheatersDto };
+
+            return movieGetPostDto;
+        }
+
+
 
         private void AddOrderToMovie(Movie movie)
         {
