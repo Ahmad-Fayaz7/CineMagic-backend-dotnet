@@ -40,7 +40,18 @@ namespace CineMagic.Controllers
             return movieGetPostDto;
         }
 
-
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<MovieDTO>> Get(int id)
+        {
+            var movie = await movieService.GetMovieWithDetails(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            var movieDto = mapper.Map<MovieDTO>(movie);
+            movieDto.Actors = movieDto.Actors.OrderBy(x => x.Order).ToList();
+            return movieDto;
+        }
 
         private void AddOrderToMovie(Movie movie)
         {

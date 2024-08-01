@@ -47,7 +47,7 @@ namespace CineMagic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Actors");
+                    b.ToTable("Actors", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.Genre", b =>
@@ -65,7 +65,7 @@ namespace CineMagic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.Movie", b =>
@@ -98,7 +98,7 @@ namespace CineMagic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Movie");
+                    b.ToTable("Movie", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.MovieActor", b =>
@@ -120,7 +120,7 @@ namespace CineMagic.Migrations
 
                     b.HasIndex("ActorId");
 
-                    b.ToTable("MovieActors");
+                    b.ToTable("MovieActors", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.MovieGenre", b =>
@@ -135,7 +135,7 @@ namespace CineMagic.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("MovieGenres");
+                    b.ToTable("MovieGenres", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.MovieTheater", b =>
@@ -157,7 +157,7 @@ namespace CineMagic.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MovieTheaters");
+                    b.ToTable("MovieTheaters", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.MovieTheaterMovie", b =>
@@ -172,7 +172,7 @@ namespace CineMagic.Migrations
 
                     b.HasIndex("MovieTheaterId");
 
-                    b.ToTable("movieTheaterMovies");
+                    b.ToTable("movieTheaterMovies", (string)null);
                 });
 
             modelBuilder.Entity("CineMagic.Models.MovieActor", b =>

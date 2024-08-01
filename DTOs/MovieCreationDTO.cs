@@ -12,9 +12,9 @@ namespace CineMagic.DTOs
         public DateTime? ReleaseDate { get; set; }
         public IFormFile? Poster { get; set; }
         [ModelBinder(BinderType = typeof(TypeBinder<List<int>>))]
-        public List<int> GenresId { get; set; }
+        public List<int> GenresIds { get; set; }
         [ModelBinder(BinderType = typeof(TypeBinder<List<int>>))]
-        public List<int> MovieTheatersId { get; set; }
+        public List<int> MovieTheatersIds { get; set; }
 
         [ModelBinder(BinderType = typeof(TypeBinder<List<MovieActorCreationDTO>>))]
         public List<MovieActorCreationDTO> Actors { get; set; }

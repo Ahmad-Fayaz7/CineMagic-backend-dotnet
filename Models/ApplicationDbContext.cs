@@ -6,6 +6,7 @@ namespace CineMagic.Models
     {
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Actor> Actors { get; set; }
+        public DbSet<Movie> Movie { get; set; }
         public DbSet<MovieTheater> MovieTheaters { get; set; }
         public DbSet<MovieGenre> MovieGenres { get; set; }
         public DbSet<MovieActor> MovieActors { get; set; }

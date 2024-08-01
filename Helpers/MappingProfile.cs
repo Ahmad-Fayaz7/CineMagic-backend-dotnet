@@ -29,11 +29,60 @@ namespace CineMagic.Helpers
                 .ForMember(x => x.MovieActors, options => options.MapFrom(MapMovieActors));
 
 
+            CreateMap<Movie, MovieDTO>()
+                .ForMember(x => x.Genres, options => options.MapFrom(MapMovieGenres))
+                .ForMember(x => x.Actors, options => options.MapFrom(MapMovieActors))
+                .ForMember(x => x.MovieTheaters, options => options.MapFrom(MapMovieTheaters));
+
 
 
         }
 
-        private object MapMovieActors(MovieCreationDTO movieCreationDTO, Movie movie)
+
+        private List<MovieTheaterDTO> MapMovieTheaters(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<MovieTheaterDTO>();
+            if (movie.MovieTheaterMovies != null)
+            {
+                foreach (var movieTheater in movie.MovieTheaterMovies)
+                {
+                    result.Add(new MovieTheaterDTO { Id = movieTheater.MovieTheaterId, Name = movieTheater.MovieTheater.Name, latitude = movieTheater.MovieTheater.Location.Y, longitude = movieTheater.MovieTheater.Location.X });
+                }
+            }
+
+            return result;
+        }
+
+
+        private List<MovieActorDTO> MapMovieActors(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<MovieActorDTO>();
+            if (movie.MovieActors != null)
+            {
+                foreach (var actor in movie.MovieActors)
+                {
+                    result.Add(new MovieActorDTO { Id = actor.ActorId, Name = actor.Actor.Name, Character = actor.Character, Picture = actor.Actor.picture, Order = actor.Order });
+                }
+            }
+
+            return result;
+        }
+
+        private List<GenreDTO> MapMovieGenres(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<GenreDTO>();
+            if (movie.MovieGenres != null)
+            {
+                foreach (var genre in movie.MovieGenres)
+                {
+                    result.Add(new GenreDTO { Id = genre.GenreId, Name = genre.Genre.Name });
+                }
+            }
+
+            return result;
+        }
+
+        private List<MovieActor> MapMovieActors(MovieCreationDTO movieCreationDTO, Movie movie)
         {
             var result = new List<MovieActor>();
             if (movieCreationDTO.Actors == null)
@@ -50,11 +99,11 @@ namespace CineMagic.Helpers
         private List<MovieGenre> MapMovieGenres(MovieCreationDTO movieCreationDTO, Movie movie)
         {
             var result = new List<MovieGenre>();
-            if (movieCreationDTO.GenresId == null)
+            if (movieCreationDTO.GenresIds == null)
             {
                 return result;
             }
-            foreach (var id in movieCreationDTO.GenresId)
+            foreach (var id in movieCreationDTO.GenresIds)
             {
                 result.Add(new MovieGenre() { GenreId = id });
             }
@@ -64,11 +113,11 @@ namespace CineMagic.Helpers
         private List<MovieTheaterMovie> MapMovieTheaterMovies(MovieCreationDTO movieCreationDTO, Movie movie)
         {
             var result = new List<MovieTheaterMovie>();
-            if (movieCreationDTO.MovieTheatersId == null)
+            if (movieCreationDTO.MovieTheatersIds == null)
             {
                 return result;
             }
-            foreach (var id in movieCreationDTO.MovieTheatersId)
+            foreach (var id in movieCreationDTO.MovieTheatersIds)
             {
                 result.Add(new MovieTheaterMovie() { MovieTheaterId = id });
             }
