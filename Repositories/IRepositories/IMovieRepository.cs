@@ -4,6 +4,8 @@ namespace CineMagic.Repositories.IRepositories
 {
     public interface IMovieRepository : IRepository<Movie>
     {
+        Task<List<Movie>> GetMoviesInTheater();
         Task<Movie> GetMovieWithDetails(int id);
+        Task<List<Movie>> GetUpcomingMovies();
     }
 }

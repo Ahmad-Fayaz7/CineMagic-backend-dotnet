@@ -49,5 +49,9 @@ namespace CineMagic.Services
             return true;
         }
 
+        public async Task<List<MovieTheater>> GetNonSelectedMovieTheaters(List<int> selectedMovieTheatersIds)
+        {
+            return await unitOfWork.MoviesTheaters.GetNonSelectedMovieTheaters(selectedMovieTheatersIds);
+        }
     }
 }

@@ -6,6 +6,13 @@ namespace CineMagic.Repositories
 {
     public class MovieRepository(ApplicationDbContext dbContext) : Repository<Movie>(dbContext), IMovieRepository
     {
+        public async Task<List<Movie>> GetMoviesInTheater()
+        {
+            var top = 6;
+            var moviesInTheater = await dbContext.Movie.Where(x => (bool)x.InTheaters).OrderBy(x => x.ReleaseDate).Take(top).ToListAsync();
+            return moviesInTheater;
+        }
+
         public async Task<Movie> GetMovieWithDetails(int id)
         {
             var movie = dbContext.Movie
@@ -15,6 +22,14 @@ namespace CineMagic.Repositories
                 .FirstOrDefault(x => x.Id == id);
 
             return movie;
+        }
+
+        public async Task<List<Movie>> GetUpcomingMovies()
+        {
+            var top = 6;
+            var today = DateTime.Today;
+            var upcomingMovies = await dbContext.Movie.Where(x => x.ReleaseDate > today).OrderBy(x => x.ReleaseDate).ToListAsync();
+            return upcomingMovies;
         }
     }
 }

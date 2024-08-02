@@ -25,6 +25,16 @@ namespace CineMagic.Services
             return movie;
         }
 
+        public async Task<List<Movie>> GetMovieshInTheaters()
+        {
+            var moviesInTheater = await unitOfWork.Movies.GetMoviesInTheater();
+            return moviesInTheater;
+        }
 
+        public async Task<List<Movie>> GetUpcomingMovies()
+        {
+            var upcomingMovies = await unitOfWork.Movies.GetUpcomingMovies();
+            return upcomingMovies;
+        }
     }
 }

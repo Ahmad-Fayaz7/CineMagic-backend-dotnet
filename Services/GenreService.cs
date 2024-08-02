@@ -40,6 +40,13 @@ namespace CineMagic.Services
             return true;
         }
 
+        public async Task<List<Genre>> GetNonSelectedGenres(List<int> selectedGenresIds)
+        {
+            // Returns the list of nonselected genres out of selected genres
+            var nonSelectedGenres = await unitOfWork.Genres.GetNonSelectedGenres(selectedGenresIds);
+            return nonSelectedGenres;
+        }
+
         public async Task<bool> DeleteGenreAsync(int id)
         {
             if (!await unitOfWork.Genres.ExistsAsync(id))
