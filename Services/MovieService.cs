@@ -36,5 +36,10 @@ namespace CineMagic.Services
             var upcomingMovies = await unitOfWork.Movies.GetUpcomingMovies();
             return upcomingMovies;
         }
+
+        public async Task<IQueryable<Movie>> GetAllMoviesAsQueryableAsync()
+        {
+            return await unitOfWork.Movies.GetAllMoviesAsQueryableAsync();
+        }
     }
 }

@@ -6,6 +6,11 @@ namespace CineMagic.Repositories
 {
     public class MovieRepository(ApplicationDbContext dbContext) : Repository<Movie>(dbContext), IMovieRepository
     {
+        public async Task<IQueryable<Movie>> GetAllMoviesAsQueryableAsync()
+        {
+            return dbContext.Movie.AsQueryable();
+        }
+
         public async Task<List<Movie>> GetMoviesInTheater()
         {
             var top = 6;

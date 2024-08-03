@@ -5,6 +5,7 @@ using CineMagic.Models;
 using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CineMagic.Controllers
 {
@@ -15,7 +16,7 @@ namespace CineMagic.Controllers
         private readonly string containerName = "movies";
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromForm] MovieCreationDTO movieCreationDTO)
+        public async Task<ActionResult<int>> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {
             var movie = mapper.Map<Movie>(movieCreationDTO);
             if (movieCreationDTO.Poster != null)
@@ -25,7 +26,7 @@ namespace CineMagic.Controllers
             AddOrderToMovie(movie);
             await movieService.AddMovieAsync(movie);
 
-            return NoContent();
+            return movie.Id;
         }
         [HttpGet("GetPost")]
         public async Task<ActionResult<MovieGetPostDTO>> GetPost()
@@ -72,10 +73,10 @@ namespace CineMagic.Controllers
             if (movieActionResult.Result is NotFoundResult) { return NotFound(); }
             var movie = movieActionResult.Result.Value;
             var selectedGenresIds = movie.Genres.Select(x => x.Id).ToList();
-            var nonSelectedGenres = genreService.GetNonSelectedGenres(selectedGenresIds);
+            var nonSelectedGenres = await genreService.GetNonSelectedGenres(selectedGenresIds);
 
             var selectedMovieTheatersIds = movie.MovieTheaters.Select(x => x.Id).ToList();
-            var nonSelectedMovieTheaters = movieTheaterService.GetNonSelectedMovieTheaters(selectedMovieTheatersIds);
+            var nonSelectedMovieTheaters = await movieTheaterService.GetNonSelectedMovieTheaters(selectedMovieTheatersIds);
 
             var nonSelectedGenresDto = mapper.Map<List<GenreDTO>>(nonSelectedGenres);
             var nonSelectedMovieTheaterDto = mapper.Map<List<MovieTheaterDTO>>(nonSelectedMovieTheaters);
@@ -91,7 +92,38 @@ namespace CineMagic.Controllers
             return response;
         }
 
-        [HttpPut]
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<MovieDTO>>> Filter([FromQuery] MovieFilterDTO movieFilterDTO)
+        {
+            var moviesQueryable = await movieService.GetAllMoviesAsQueryableAsync();
+
+            if (!string.IsNullOrEmpty(movieFilterDTO.Title))
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.Title.Contains(movieFilterDTO.Title));
+            }
+
+            if (movieFilterDTO.InTheaters)
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.InTheaters);
+            }
+
+            if (movieFilterDTO.UpcomingReleases)
+            {
+                var today = DateTime.Today;
+                moviesQueryable = moviesQueryable.Where(x => x.ReleaseDate > today);
+            }
+
+            if (movieFilterDTO.GenreId != 0)
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.MovieGenres.Select(y => y.GenreId).Contains(movieFilterDTO.GenreId));
+            }
+
+            await HttpContext.InsertPaginationParametersInHeader(moviesQueryable);
+            var movies = moviesQueryable.OrderBy(x => x.Title).Paginate(movieFilterDTO.paginationDTO).ToListAsync();
+            return mapper.Map<List<MovieDTO>>(movies);
+        }
+
+        [HttpPut("{id:int}")]
         public async Task<ActionResult> Put(int id, [FromForm] MovieCreationDTO movieCreationDTO)
         {
             var movie = await movieService.GetMovieWithDetails(id);

@@ -14,7 +14,8 @@ namespace CineMagic.Repositories
 
         public async Task<List<Genre>> GetNonSelectedGenres(List<int> selectedGenresIds)
         {
-            return await _dbContext.Genres.Where(x => !selectedGenresIds.Contains(x.Id)).ToListAsync();
+            var genres = await _dbContext.Genres.Where(x => !selectedGenresIds.Contains(x.Id)).ToListAsync();
+            return genres;
 
         }
 
