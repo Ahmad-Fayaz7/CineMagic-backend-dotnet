@@ -8,13 +8,14 @@ namespace CineMagic.Repositories
     {
         public async Task<IQueryable<Movie>> GetAllMoviesAsQueryableAsync()
         {
-            return dbContext.Movie.AsQueryable();
+            var movies = dbContext.Movie.AsQueryable();
+            return movies;
         }
 
         public async Task<List<Movie>> GetMoviesInTheater()
         {
             var top = 6;
-            var moviesInTheater = await dbContext.Movie.Where(x => (bool)x.InTheaters).OrderBy(x => x.ReleaseDate).Take(top).ToListAsync();
+            var moviesInTheater = await dbContext.Movie.Where(x => x.InTheaters).OrderBy(x => x.ReleaseDate).Take(top).ToListAsync();
             return moviesInTheater;
         }
 

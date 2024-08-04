@@ -95,32 +95,51 @@ namespace CineMagic.Controllers
         [HttpGet("filter")]
         public async Task<ActionResult<List<MovieDTO>>> Filter([FromQuery] MovieFilterDTO movieFilterDTO)
         {
-            var moviesQueryable = await movieService.GetAllMoviesAsQueryableAsync();
-
-            if (!string.IsNullOrEmpty(movieFilterDTO.Title))
+            try
             {
-                moviesQueryable = moviesQueryable.Where(x => x.Title.Contains(movieFilterDTO.Title));
-            }
+                var moviesQueryable = await movieService.GetAllMoviesAsQueryableAsync();
 
-            if (movieFilterDTO.InTheaters)
+                // Title filter
+                if (!string.IsNullOrEmpty(movieFilterDTO.Title))
+                {
+                    moviesQueryable = moviesQueryable.Where(x => x.Title.Contains(movieFilterDTO.Title));
+                }
+
+                // In Theaters filter
+                if (movieFilterDTO.InTheaters)
+                {
+                    moviesQueryable = moviesQueryable.Where(x => x.InTheaters);
+                }
+
+                // Upcoming Releases filter
+                if (movieFilterDTO.UpcomingReleases)
+                {
+                    var today = DateTime.Today;
+                    moviesQueryable = moviesQueryable.Where(x => x.ReleaseDate > today);
+                }
+
+                // Genre filter
+                if (movieFilterDTO.GenreId != 0)
+                {
+                    moviesQueryable = moviesQueryable.Where(x => x.MovieGenres.Any(y => y.GenreId == movieFilterDTO.GenreId));
+                }
+
+                // Passes the total amount of elements/records to front-end
+                await HttpContext.InsertPaginationParametersInHeader(moviesQueryable);
+
+                // Paginates the filter result
+                var movies = await moviesQueryable.OrderBy(x => x.Title).Paginate(movieFilterDTO.paginationDTO).ToListAsync();
+
+                return mapper.Map<List<MovieDTO>>(movies);
+            }
+            catch (Exception ex)
             {
-                moviesQueryable = moviesQueryable.Where(x => x.InTheaters);
-            }
+                // Log the exception (you can use any logging framework)
+                // _logger.LogError(ex, "An error occurred while filtering movies");
 
-            if (movieFilterDTO.UpcomingReleases)
-            {
-                var today = DateTime.Today;
-                moviesQueryable = moviesQueryable.Where(x => x.ReleaseDate > today);
+                // Return an appropriate error response
+                return StatusCode(500, "An error occurred while processing your request.");
             }
-
-            if (movieFilterDTO.GenreId != 0)
-            {
-                moviesQueryable = moviesQueryable.Where(x => x.MovieGenres.Select(y => y.GenreId).Contains(movieFilterDTO.GenreId));
-            }
-
-            await HttpContext.InsertPaginationParametersInHeader(moviesQueryable);
-            var movies = moviesQueryable.OrderBy(x => x.Title).Paginate(movieFilterDTO.paginationDTO).ToListAsync();
-            return mapper.Map<List<MovieDTO>>(movies);
         }
 
         [HttpPut("{id:int}")]
@@ -139,6 +158,20 @@ namespace CineMagic.Controllers
 
             AddOrderToMovie(movie);
             await unitOfWork.CompleteAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var movie = await movieService.GetMovieById(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            await movieService.DeleteMovie(movie);
+            await unitOfWork.CompleteAsync();
+            await inAppStorageService.DeleteFile(containerName, movie.Poster);
             return NoContent();
         }
         private void AddOrderToMovie(Movie movie)

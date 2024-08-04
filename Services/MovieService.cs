@@ -19,6 +19,12 @@ namespace CineMagic.Services
             return movies;
         }
 
+        public async Task<Movie> GetMovieById(int id)
+        {
+            var movie = await unitOfWork.Movies.GetByIdAsync(id);
+            return movie;
+        }
+
         public async Task<Movie> GetMovieWithDetails(int id)
         {
             var movie = await unitOfWork.Movies.GetMovieWithDetails(id);
@@ -37,9 +43,14 @@ namespace CineMagic.Services
             return upcomingMovies;
         }
 
-        public async Task<IQueryable<Movie>> GetAllMoviesAsQueryableAsync()
+        public Task<IQueryable<Movie>> GetAllMoviesAsQueryableAsync()
         {
-            return await unitOfWork.Movies.GetAllMoviesAsQueryableAsync();
+            return unitOfWork.Movies.GetAllMoviesAsQueryableAsync();
+        }
+
+        public async Task DeleteMovie(Movie movie)
+        {
+            await unitOfWork.Movies.RemoveAsync(movie);
         }
     }
 }
