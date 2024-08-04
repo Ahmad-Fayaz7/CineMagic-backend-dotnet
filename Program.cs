@@ -4,6 +4,8 @@ using CineMagic.Models;
 using CineMagic.Repositories;
 using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
@@ -16,7 +18,27 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddIdentity<Microsoft.AspNet.Identity.EntityFramework.IdentityUser, Microsoft.AspNet.Identity.EntityFramework.IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+    options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+        };
+    }
+    );
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions => sqlOptions.UseNetTopologySuite()));
+
+
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
