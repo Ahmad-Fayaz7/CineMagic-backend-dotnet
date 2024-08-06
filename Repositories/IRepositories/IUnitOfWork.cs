@@ -6,6 +6,7 @@
         IGenreRepository Genres { get; }
         IMovieRepository Movies { get; }
         IMovieTheaterRepository MoviesTheaters { get; }
+        IRatingRepository Rates { get; }
         Task<int> CompleteAsync();
     }
 }

@@ -52,5 +52,15 @@ namespace CineMagic.Services
         {
             await unitOfWork.Movies.RemoveAsync(movie);
         }
+
+        public async Task<Rating> GetCurrentRate(string userId, int movieId)
+        {
+            return await unitOfWork.Rates.GetCurrentRate(userId, movieId);
+        }
+
+        public async Task AddRatingAsync(Rating rating)
+        {
+            await unitOfWork.Rates.AddAsync(rating);
+        }
     }
 }

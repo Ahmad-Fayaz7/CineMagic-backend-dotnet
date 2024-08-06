@@ -19,7 +19,7 @@ namespace CineMagic.Controllers
         public async Task<ActionResult<AuthenticationResponse>> create([FromBody] UserCredentials userCredentials)
         {
             var user = new IdentityUser { UserName = userCredentials.Email, Email = userCredentials.Email };
-            var result = await userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user, userCredentials.Password);
             if (result.Succeeded)
             {
                 return BuildToken(userCredentials);

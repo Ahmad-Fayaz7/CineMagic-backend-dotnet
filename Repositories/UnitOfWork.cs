@@ -12,6 +12,8 @@ namespace CineMagic.Repositories
         public IMovieRepository Movies { get; private set; }
 
         public IMovieTheaterRepository MoviesTheaters { get; private set; }
+
+        public IRatingRepository Rates { get; private set; }
         private readonly ApplicationDbContext _context;
 
 
@@ -22,6 +24,7 @@ namespace CineMagic.Repositories
             Genres = new GenreRepository(_context);
             Movies = new MovieRepository(_context);
             MoviesTheaters = new MovieTheaterRepository(_context);
+            Rates = new RatingRepository(_context);
         }
         public async Task<int> CompleteAsync()
         {

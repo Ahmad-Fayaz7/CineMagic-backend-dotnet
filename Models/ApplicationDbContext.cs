@@ -16,6 +16,7 @@ namespace CineMagic.Models
         public DbSet<MovieGenre> MovieGenres { get; set; }
         public DbSet<MovieActor> MovieActors { get; set; }
         public DbSet<MovieTheaterMovie> MovieTheaterMovies { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
