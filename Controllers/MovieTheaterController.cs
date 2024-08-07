@@ -1,14 +1,18 @@
 ﻿using AutoMapper;
 using CineMagic.DTOs;
 using CineMagic.Models;
+using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineMagic.Controllers
 {
     [Route("api/movietheaters")]
     [ApiController]
-    public class MovieTheaterController(MovieTheaterService movieTheaterService, IMapper mapper) : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+    public class MovieTheaterController(MovieTheaterService movieTheaterService, IMapper mapper, IUnitOfWork unitOfWork) : ControllerBase
     {
         [HttpGet]
         public async Task<ActionResult<List<MovieTheaterDTO>>> GetMovieTheaters()
@@ -34,7 +38,7 @@ namespace CineMagic.Controllers
         {
             var movieTheater = mapper.Map<MovieTheater>(movieTheaterCreationDTO);
             await movieTheaterService.AddMovieTheaterAsync(movieTheater);
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -44,7 +48,7 @@ namespace CineMagic.Controllers
             var movieTheater = await movieTheaterService.GetMovieTheaterByIdAsync(id);
             if (movieTheater == null) { return NotFound(); }
             movieTheater = mapper.Map(movieTheaterCreationDTO, movieTheater);
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -57,7 +61,7 @@ namespace CineMagic.Controllers
                 return NotFound();
             }
             await movieTheaterService.DeleteMovieTheaterAsync(id);
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 

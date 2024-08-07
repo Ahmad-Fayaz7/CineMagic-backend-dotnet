@@ -1,19 +1,18 @@
 ﻿
 using CineMagic.DTOs;
 using CineMagic.Models;
-using CineMagic.Repositories;
+using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineMagic.Controllers
 {
     [Route("api/ratings")]
     [ApiController]
-    public class RatingsController(MovieService movieService, UserManager<IdentityUser> userManager, UnitOfWork unitOfWork) : ControllerBase
+    public class RatingsController(MovieService movieService, UserManager<IdentityUser> userManager, IUnitOfWork unitOfWork) : ControllerBase
     {
 
 

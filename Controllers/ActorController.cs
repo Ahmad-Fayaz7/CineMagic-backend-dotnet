@@ -2,7 +2,10 @@
 using CineMagic.DTOs;
 using CineMagic.Helpers;
 using CineMagic.Models;
+using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +13,8 @@ namespace CineMagic.Controllers
 {
     [Route("api/actors")]
     [ApiController]
-    public class ActorController(ActorService actorService, IMapper mapper, IFileStorageService fileStorageService) : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+    public class ActorController(ActorService actorService, IMapper mapper, IFileStorageService fileStorageService, IUnitOfWork unitOfWork) : ControllerBase
     {
         private readonly string containerName = "actors";
 
@@ -40,7 +44,7 @@ namespace CineMagic.Controllers
                 actor.picture = await fileStorageService.SaveFile(containerName, actorCreationDTO.picture);
             }
             await actorService.AddActorAsync(actor);
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -64,7 +68,7 @@ namespace CineMagic.Controllers
             {
                 actor.picture = await fileStorageService.EditFile(containerName, actorCreationDTO.picture, actor.picture);
             }
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
         [HttpDelete("{id:int}")]
@@ -75,6 +79,7 @@ namespace CineMagic.Controllers
             await actorService.DeleteActorAsync(actor.Id);
 
             await fileStorageService.DeleteFile(actor.picture, containerName);
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
     }

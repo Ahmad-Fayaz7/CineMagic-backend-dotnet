@@ -9,6 +9,8 @@
         public bool? InTheaters { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public string? Poster { get; set; }
+        public double AverageRate { get; set; }
+        public int UserRate { get; set; }
         public List<GenreDTO>? Genres { get; set; }
         public List<MovieTheaterDTO>? MovieTheaters { get; set; }
         public List<MovieActorDTO>? Actors { get; set; }

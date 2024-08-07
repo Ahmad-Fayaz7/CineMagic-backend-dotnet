@@ -4,6 +4,9 @@ using CineMagic.Helpers;
 using CineMagic.Models;
 using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +14,12 @@ namespace CineMagic.Controllers
 {
     [Route("api/movies")]
     [ApiController]
-    public class MovieController(MovieService movieService, IMapper mapper, IFileStorageService inAppStorageService, GenreService genreService, MovieTheaterService movieTheaterService, ActorService actorService, IUnitOfWork unitOfWork) : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+    public class MovieController(MovieService movieService, IMapper mapper, IFileStorageService inAppStorageService, GenreService genreService, MovieTheaterService movieTheaterService, ActorService actorService, IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager) : ControllerBase
     {
         private readonly string containerName = "movies";
+
+        // Create
 
         [HttpPost]
         public async Task<ActionResult<int>> Post([FromForm] MovieCreationDTO movieCreationDTO)
@@ -25,9 +31,11 @@ namespace CineMagic.Controllers
             }
             AddOrderToMovie(movie);
             await movieService.AddMovieAsync(movie);
-
+            await unitOfWork.CompleteAsync();
             return movie.Id;
         }
+
+        // Returns list of genres and movie theater 
         [HttpGet("GetPost")]
         public async Task<ActionResult<MovieGetPostDTO>> GetPost()
         {
@@ -42,7 +50,10 @@ namespace CineMagic.Controllers
             return movieGetPostDto;
         }
 
+        // Get all movies
+
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<HomeDTO>> Get()
         {
             var inTheater = await movieService.GetMovieshInTheaters();
@@ -53,7 +64,9 @@ namespace CineMagic.Controllers
             return homeDto;
         }
 
+        // Returns a movie
         [HttpGet("{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<MovieDTO>> Get(int id)
         {
             var movie = await movieService.GetMovieWithDetails(id);
@@ -63,9 +76,26 @@ namespace CineMagic.Controllers
             }
             var movieDto = mapper.Map<MovieDTO>(movie);
             movieDto.Actors = movieDto.Actors.OrderBy(x => x.Order).ToList();
+
+            var averageRate = await movieService.GetRatingAverageAsync(movie.Id);
+            var userRate = 0;
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                var email = HttpContext.User.Claims.FirstOrDefault(x => x.Type == "email").Value;
+                var user = await userManager.FindByEmailAsync(email);
+                var userId = user.Id;
+                var ratingInDb = await movieService.GetCurrentRate(userId, id);
+                if (ratingInDb != null)
+                {
+                    userRate = ratingInDb.Rate;
+                }
+            }
+            movieDto.AverageRate = averageRate;
+            movieDto.UserRate = userRate;
             return movieDto;
         }
 
+        // Returns movie with selected and nonselected genres and movie theaters including actors
         [HttpGet("putget/{id:int}")]
         public async Task<ActionResult<MoviePutGetDTO>> PutGet(int id)
         {
@@ -92,7 +122,10 @@ namespace CineMagic.Controllers
             return response;
         }
 
+        // Filter
+
         [HttpGet("filter")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<MovieDTO>>> Filter([FromQuery] MovieFilterDTO movieFilterDTO)
         {
             try
@@ -142,6 +175,7 @@ namespace CineMagic.Controllers
             }
         }
 
+        // Update
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Put(int id, [FromForm] MovieCreationDTO movieCreationDTO)
         {
@@ -161,6 +195,8 @@ namespace CineMagic.Controllers
             return NoContent();
         }
 
+        // Delete
+
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -172,6 +208,7 @@ namespace CineMagic.Controllers
             await movieService.DeleteMovie(movie);
             await unitOfWork.CompleteAsync();
             await inAppStorageService.DeleteFile(containerName, movie.Poster);
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
         private void AddOrderToMovie(Movie movie)

@@ -62,5 +62,13 @@ namespace CineMagic.Services
         {
             await unitOfWork.Rates.AddAsync(rating);
         }
+
+        public async Task<double> GetRatingAverageAsync(int movieId)
+        {
+            var averageRating = await unitOfWork.Rates.GetAverageRateAsync(movieId);
+            return averageRating;
+        }
+
+
     }
 }

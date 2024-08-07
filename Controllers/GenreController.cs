@@ -2,17 +2,22 @@
 using AutoMapper;
 using CineMagic.DTOs;
 using CineMagic.Models;
+using CineMagic.Repositories.IRepositories;
 using CineMagic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CineMagic.Controllers
 {
     [Route("api/genres")]
     [ApiController]
-    public class GenreController(GenreService genresService, IMapper mapper) : ControllerBase
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+    public class GenreController(GenreService genresService, IMapper mapper, IUnitOfWork unitOfWork) : ControllerBase
     {
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> Get()
         {
 
@@ -33,6 +38,7 @@ namespace CineMagic.Controllers
         {
             var genre = mapper.Map<Genre>(genreCreationDto);
             await genresService.AddAsync(genre);
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -44,7 +50,7 @@ namespace CineMagic.Controllers
             {
                 return NotFound();
             }
-
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 
@@ -52,6 +58,7 @@ namespace CineMagic.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             await genresService.DeleteGenreAsync(id);
+            await unitOfWork.CompleteAsync();
             return NoContent();
         }
 

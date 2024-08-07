@@ -22,7 +22,7 @@ namespace CineMagic.Controllers
             var result = await userManager.CreateAsync(user, userCredentials.Password);
             if (result.Succeeded)
             {
-                return BuildToken(userCredentials);
+                return await BuildToken(userCredentials);
             }
 
             return BadRequest(result.Errors);
@@ -36,7 +36,7 @@ namespace CineMagic.Controllers
             var result = await signInManager.PasswordSignInAsync(userCredentials.Email, userCredentials.Password, isPersistent: false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return BuildToken(userCredentials);
+                return await BuildToken(userCredentials);
             }
 
             return BadRequest("Incorrect login");
@@ -44,13 +44,19 @@ namespace CineMagic.Controllers
         }
 
 
-        private AuthenticationResponse BuildToken(UserCredentials userCredentials)
+        private async Task<AuthenticationResponse> BuildToken(UserCredentials userCredentials)
         {
             // Claims in payload
             var claims = new List<Claim>
             {
                 new Claim("email", userCredentials.Email)
             };
+
+            // Get user
+            var user = await userManager.FindByEmailAsync(userCredentials.Email);
+            var claimsInDb = await userManager.GetClaimsAsync(user);
+            claims.AddRange(claimsInDb);
+
 
             // Secret key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["keyjwt"]));
