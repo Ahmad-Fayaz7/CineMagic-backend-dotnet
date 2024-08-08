@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CineMagic.DTOs;
 using CineMagic.Models;
+using Microsoft.AspNet.Identity.EntityFramework;
 using NetTopologySuite.Geometries;
 
 namespace CineMagic.Helpers
@@ -33,6 +34,8 @@ namespace CineMagic.Helpers
                 .ForMember(x => x.Genres, options => options.MapFrom(MapMovieGenres))
                 .ForMember(x => x.Actors, options => options.MapFrom(MapMovieActors))
                 .ForMember(x => x.MovieTheaters, options => options.MapFrom(MapMovieTheaters));
+
+            CreateMap<IdentityUser, UserDTO>();
 
 
 

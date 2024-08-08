@@ -1,8 +1,13 @@
 ﻿
+using AutoMapper;
 using CineMagic.DTOs;
+using CineMagic.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Data.Entity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -12,7 +17,7 @@ namespace CineMagic.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
-    public class AccountsController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration) : ControllerBase
+    public class AccountsController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration, IMapper mapper) : ControllerBase
     {
 
         [HttpPost("create")]
@@ -43,7 +48,38 @@ namespace CineMagic.Controllers
 
         }
 
+        [HttpGet("listUsers")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+        public async Task<List<UserDTO>> GetUserList([FromBody] PaginationDTO pagination)
+        {
+            var usersQueryable = userManager.Users.AsQueryable();
+            await HttpContext.InsertPaginationParametersInHeader(usersQueryable);
+            var users = await usersQueryable.OrderBy(x => x.Email).Paginate(pagination).ToListAsync();
+            return mapper.Map<List<UserDTO>>(users);
+        }
 
+
+        [HttpPost("makeAdmin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+        public async Task<ActionResult> MakeAdmin([FromBody] string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+
+            await userManager.AddClaimAsync(user, new Claim("role", "admin"));
+
+            return NoContent();
+        }
+
+        [HttpPost("removeAdmin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
+        public async Task<ActionResult> RemoveAdmin([FromBody] string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+
+            await userManager.RemoveClaimAsync(user, new Claim("role", "admin"));
+
+            return NoContent();
+        }
         private async Task<AuthenticationResponse> BuildToken(UserCredentials userCredentials)
         {
             // Claims in payload
